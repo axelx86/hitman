@@ -1,0 +1,34 @@
+#Varibles
+
+#BOT
+:local bot "place your telegram bot here"
+
+#CHAT
+:local ChatID "place your telegram chat here"
+
+#OtherVars
+:local PingCount 55
+:local chkhost 192.168.0.1
+:local ResultHost [/ping count=$PingCount $chkhost]
+:local pl ($PingCount-$ResultHost)
+
+
+if ($ResultHost = 0 ) do={
+/log error "PING LOSS"
+/tool fetch url="https://api.telegram.org/bot$bot/sendMessage\?chat_id=$ChatID&text=Checking_Host_PING_LOST" keep-result=no;
+#/interface eoip remove eoip_interface
+#/interface l2tp-server remove l2tp-interface
+#/ppp secret remove ppp_secret
+/system logging action set memory memory-lines=1
+/console clear-history
+}
+
+if ($ResultHost = $PingCount ) do={
+/log info "PING OK $PingCount"
+#/tool fetch url="https://api.telegram.org/bot$bot/sendMessage\?chat_id=$ChatID&text=Checking_Host_PING_OK" keep-result=no;
+}
+
+if ($ResultHost < $PingCount ) do={
+/log error "PING UNSTABLE sent - $PingCount, recive - $ResultHost, lost - $pl"
+/tool fetch url="https://api.telegram.org/bot$bot/sendMessage\?chat_id=$ChatID&text=PING_LOST_$pl_Packets" keep-result=no;
+}
